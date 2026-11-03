@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+out/
+publish/
+artifacts/
+
+# Runtime data - settings contain credentials, App_Data may contain keys
+App_Data/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+
+# Secrets and certificates - never commit keys
+*.pfx
+*.p12
+*.key
+*.pem
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+    <RootNamespace>EadaptorNextPing</RootNamespace>
+    <AssemblyName>EadaptorNextPing</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>eAdaptor Next Ping Contributors</Authors>
+    <Product>eAdaptor Next Ping</Product>
+    <Description>A one-page web tester for CargoWise eAdaptor Next: configure OAuth 2.0 client-certificate authentication (WiseCloud), paste or load Universal XML, send it, read the response.</Description>
+    <Copyright>Copyright (c) 2026 eAdaptor Next Ping Contributors</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>cargowise;eadaptor;edi;integration;testing</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\**\*.xml" />
+  </ItemGroup>
+
+</Project>

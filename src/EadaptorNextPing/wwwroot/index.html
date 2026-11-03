@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eAdaptor Next Ping</title>
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233E7AEB'/%3E%3Ctext x='16' y='21' font-family='Segoe UI' font-size='13' font-weight='bold' fill='white' text-anchor='middle'%3EeA%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+<div class="page">
+    <header class="header">
+        <div class="brand">
+            <span class="brand-logo">eA</span>
+            <div>
+                <div class="brand-title">eAdaptor Next Ping</div>
+                <div class="brand-sub">Validate OAuth 2.0 client-certificate auth (WiseCloud) and send Universal XML to CargoWise</div>
+            </div>
+        </div>
+        <a class="btn ghost small" href="https://github.com/yufangzhao/cargowise-eadaptor-next-ping" target="_blank" rel="noopener">GitHub</a>
+    </header>
+
+    <section class="card">
+        <div class="card-head">
+            <h2>Connection</h2>
+        </div>
+
+        <div class="grid-3">
+            <div>
+                <label>Mode</label>
+                <select id="modeSelect" class="input">
+                    <option value="sync">Sync - /eAdaptorNext</option>
+                    <option value="async">Async - /eAdaptorNext/Async</option>
+                </select>
+            </div>
+            <div><label>Enterprise code</label><input id="enterpriseCodeBox" class="input" type="text" placeholder="XXX" /></div>
+            <div><label>Server code</label><input id="serverCodeBox" class="input" type="text" placeholder="YYY" /></div>
+        </div>
+
+        <label>Endpoint URL - updates automatically from Mode and the codes above</label>
+        <input id="urlBox" class="input" type="text" placeholder="https://{Enterprise Code}{Server Code}services.wisegrid.net/eAdaptorNext" />
+        <div class="hint" id="endpointHint" style="margin:-6px 0 12px"></div>
+
+        <div class="grid-2">
+            <div>
+                <label>Authentication</label>
+                <select id="authMode" class="input">
+                    <option value="OAuth">OAuth 2.0 client certificate (WiseCloud)</option>
+                    <option value="Basic">Basic (self-hosted)</option>
+                    <option value="None">None</option>
+                </select>
+            </div>
+            <div>
+                <label>Timeout (seconds)</label>
+                <input id="timeoutBox" class="input" type="number" value="250" min="1" max="600" />
+            </div>
+        </div>
+
+        <div id="oauthPanel">
+            <div class="grid-2">
+                <div><label>Client ID</label><input id="clientIdBox" class="input" type="text" placeholder="00000000-0000-0000-0000-000000000000" /></div>
+                <div><label>Scope (auto: {clientid}/.default)</label><input id="scopeBox" class="input" type="text" placeholder="{clientid}/.default" /></div>
+                <div class="grow2">
+                    <label>Token endpoint (or AAD authority URL) - <span class="mono">{tenant}</span> is replaced with the Tenant ID</label>
+                    <input id="tokenEndpointBox" class="input" type="text" placeholder="https://login.microsoftonline.com/{tenant}/v2.0" />
+                    <div class="hint" id="tokenEndpointHint"></div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>Client certificate</label>
+                    <select id="certSource" class="input">
+                        <option value="PemPair">PEM certificate + PEM key</option>
+                        <option value="Pfx">PFX / P12</option>
+                    </select>
+                </div>
+                <div class="center-v">
+                    <button id="openCsrBtn" class="btn" type="button">Generate key + CSR...</button>
+                    <span class="hint">No certificate yet? Create one without openssl.</span>
+                </div>
+            </div>
+
+            <div id="pemPanel" class="grid-2">
+                <div>
+                    <div class="label-row">
+                        <label>Certificate (.pem / .cer) - server path or paste PEM</label>
+                        <button id="loadCertBtn" class="btn ghost small" type="button">Load file...</button>
+                        <input id="certFileInput" type="file" accept=".pem,.cer,.crt,.txt" class="hidden" />
+                    </div>
+                    <textarea id="certPathBox" class="input mono area" rows="3"
+                              placeholder="eadaptor.pem&#10;or paste: -----BEGIN CERTIFICATE----- ..."></textarea>
+                </div>
+                <div>
+                    <div class="label-row">
+                        <label>Private key (.key / .pem) - server path or paste PEM</label>
+                        <button id="loadKeyBtn" class="btn ghost small" type="button">Load file...</button>
+                        <input id="keyFileInput" type="file" accept=".key,.pem,.txt" class="hidden" />
+                    </div>
+                    <textarea id="keyPathBox" class="input mono area" rows="3"
+                              placeholder="eadaptor.key&#10;or paste: -----BEGIN PRIVATE KEY----- / -----BEGIN RSA PRIVATE KEY-----"></textarea>
+                </div>
+                <div><label>Key password (encrypted PKCS#8 only)</label>
+                    <input id="keyPwdBox" class="input" type="password" /></div>
+            </div>
+            <div id="pfxPanel" class="grid-2 hidden">
+                <div><label>PFX / P12 file (on the server)</label>
+                    <input id="pfxPathBox" class="input mono" type="text" placeholder="E:\certs\eadaptor.pfx" /></div>
+                <div><label>PFX password</label>
+                    <input id="pfxPwdBox" class="input" type="password" /></div>
+            </div>
+
+            <div class="row">
+                <button id="testAuthBtn" class="btn primary" type="button">Test authentication</button>
+                <span class="hint grow" id="authStatus">Tests the token request without sending any XML.</span>
+            </div>
+        </div>
+
+        <div id="basicPanel" class="hidden">
+            <div class="grid-2">
+                <div><label>Username</label><input id="basicUserBox" class="input" type="text" placeholder="eadapter" /></div>
+                <div><label>Password</label><input id="basicPwdBox" class="input" type="password" /></div>
+            </div>
+        </div>
+
+        <p class="hint" id="nonePanel" hidden> No authentication is applied.</p>
+    </section>
+
+    <section class="card">
+        <div class="card-head">
+            <h2>Request (Universal XML)</h2>
+            <div class="row">
+                <button id="sampleBtn" class="btn ghost small" type="button">Sample</button>
+                <button id="loadFileBtn" class="btn ghost small" type="button">Load file...</button>
+                <button id="formatBtn" class="btn ghost small" type="button">Format</button>
+                <button id="clearBtn" class="btn ghost small" type="button">Clear</button>
+                <input id="fileInput" type="file" accept=".xml,.txt" class="hidden" />
+            </div>
+        </div>
+        <textarea id="bodyBox" class="editor" spellcheck="false" placeholder="Paste a UniversalInterchange document, or click Load file / Sample"></textarea>
+        <div class="hint" id="bodySize">empty</div>
+    </section>
+
+    <div class="row send-row">
+        <button id="sendBtn" class="btn primary big" type="button">Send to CargoWise</button>
+        <span class="hint grow" id="sendStatus"></span>
+    </div>
+
+    <section class="card">
+        <div class="card-head">
+            <h2>Response
+                <span id="httpBadge" class="badge bad hidden"></span>
+                <span class="hint" id="durText"></span>
+                <span id="universalBadge" class="badge hidden"></span>
+            </h2>
+            <button id="copyRespBtn" class="btn ghost small hidden" type="button">Copy</button>
+        </div>
+        <div id="processingLog" class="hint wrap"></div>
+        <pre id="respHeaders" class="code small hidden"></pre>
+        <pre id="respBody" class="code"></pre>
+    </section>
+
+    <footer class="footer">
+        A localhost developer tool - no authentication, credentials (including pasted PEM keys) are stored in
+        Nothing you type is stored anywhere - the server keeps no state, and a page refresh clears every field.
+        For the complete protocol specification, refer to WiseTech's <b>eAdaptor Next Developer's Guide</b> (PDF).
+        eAdaptor and CargoWise are products of WiseTech Global; this tool is an independent community workbench.
+        MIT licensed.
+    </footer>
+</div>
+<div id="csrModal" class="hidden">
+    <div class="modal-backdrop" id="csrModalBackdrop"></div>
+    <div class="modal">
+        <div class="card-head">
+            <h2>Generate key + CSR <span class="hint">no openssl needed</span></h2>
+            <button id="closeCsrBtn" class="btn ghost small" type="button">Close</button>
+        </div>
+        <p class="hint" style="margin-top:-6px">
+            Enter your <b>EnterpriseID</b> - the CSR Common Name follows the CargoWise convention
+            <span class="mono">{EnterpriseID}-eAdaptorNext</span> (e.g. XXX-eAdaptorNext). Everything else is pre-filled.
+        </p>
+        <div class="grid-2">
+            <div>
+                <label>EnterpriseID *</label>
+                <input id="enterpriseIdBox" class="input" type="text" placeholder="XXX" />
+                <div class="hint" id="csrCnPreview"></div>
+            </div>
+            <div><label>File name prefix (optional)</label><input id="csrPrefixBox" class="input mono" type="text" placeholder="eadaptor" /></div>
+            <div>
+                <label>Key size</label>
+                <select id="csrKeySize" class="input">
+                    <option value="2048">RSA 2048</option>
+                    <option value="3072">RSA 3072</option>
+                    <option value="4096">RSA 4096</option>
+                </select>
+            </div>
+            <div><label>Key password (optional)</label><input id="csrKeyPwd" class="input" type="password" /></div>
+        </div>
+        <div class="row">
+            <button id="generateCsrBtn" class="btn primary" type="button">Generate CSR + Key</button>
+            <span class="hint grow" id="csrStatus"></span>
+        </div>
+        <div id="csrResult" class="hidden">
+            <label>Certificate signing request - upload this file in CargoWise (Inbound tab)</label>
+            <pre id="csrPemOut" class="code"></pre>
+            <div class="row">
+                <button id="copyCsrBtn" class="btn ghost small" type="button">Copy CSR</button>
+                <a id="downloadCsrBtn" class="btn small" href="#" download="eadaptor.csr">Download .csr</a>
+                <a id="downloadKeyBtn" class="btn small" href="#" download="eadaptor.key">Download .key</a>
+            </div>
+            <label>Private key - keep it safe, never share it</label>
+            <pre id="keyPemOut" class="code"></pre>
+            <label>Equivalent openssl command</label>
+            <pre id="opensslCmdOut" class="code small"></pre>
+            <div class="row">
+                <button id="copyOpensslBtn" class="btn ghost small" type="button">Copy openssl command</button>
+            </div>
+            <p class="hint">Next step: upload the .csr in CargoWise (Maintain &gt; EDI Messaging &gt; EDI Client Details, Inbound tab), click Generate Certificate, then paste the issued certificate into the Certificate field together with this key.</p>
+        </div>
+    </div>
+</div>
+<div id="toasts"></div>
+<script src="js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UniversalInterchange xmlns="http://www.cargowise.com/Schemas/Universal/2011/11" version="1.1">
+  <Header>
+    <SenderID>eadapter</SenderID>
+    <RecipientID>XXXYYYZZZ</RecipientID>
+  </Header>
+  <Body>
+    <UniversalEvent>
+      <Event>
+        <DataContext>
+          <DataTargetCollection>
+            <DataTarget>
+              <Type>ForwardingShipment</Type>
+              <Key>SHPL00000001</Key>
+            </DataTarget>
+          </DataTargetCollection>
+        </DataContext>
+        <EventTime>2026-01-01T00:00:00Z</EventTime>
+        <EventType>Update</EventType>
+        <Description>Ping sample from eAdaptor Next Ping</Description>
+      </Event>
+    </UniversalEvent>
+  </Body>
+</UniversalInterchange>
